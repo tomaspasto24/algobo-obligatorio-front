@@ -9,11 +9,12 @@ const nodes = new vis.DataSet([
 ]);
 
 const edges = new vis.DataSet([
-    { from: 1, to: 2 },
-    { from: 1, to: 3 },
-    { from: 2, to: 4 },
-    { from: 2, to: 5 }
+    { from: 1, to: 2, label: '5', font: { align: 'middle' } },
+    { from: 1, to: 3, label: '3', font: { align: 'middle' } },
+    { from: 2, to: 4, label: '2', font: { align: 'middle' } },
+    { from: 2, to: 5, label: '4', font: { align: 'middle' } }
 ]);
+
 
 const data = { nodes, edges };
 const options = {
@@ -32,7 +33,13 @@ const options = {
     edges: {
         color: '#848484',
         width: 2,
-        smooth: { type: 'dynamic' }
+        smooth: { type: 'dynamic' },
+        font: {
+            size: 14,
+            color: '#F0F0F0',
+            align: 'middle',
+            strokeWidth: 0
+        },
     },
     physics: {
         enabled: true,
