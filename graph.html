@@ -3,15 +3,138 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Grafo</title>
-    <link rel="stylesheet" href="style.css">
-    <script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+    <title>Dynamic Graph with Node Color Based on Power Usage</title>
+    <script type="text/javascript" src="https://unpkg.com/vis-network@9.1.2/standalone/umd/vis-network.min.js"></script>
 </head>
 <body>
-    <h1>Grafo</h1>
-    <div id="graph"></div>
+    <div id="graph" style="width: 600px; height: 400px;"></div>
+    <div>
+        <button onclick="addNode()">Add Node</button>
+        <button onclick="removeNode()">Remove Node</button>
+        <button onclick="addEdge()">Add Edge</button>
+        <button onclick="removeEdge()">Remove Edge</button>
+    </div>
 
-    <link rel="stylesheet" href="graph.css">
-    <script src="graph.js"></script>
+    <script>
+        const container = document.getElementById('graph');
+
+        const nodes = new vis.DataSet([]);
+        const edges = new vis.DataSet([]);
+
+        const data = { nodes, edges };
+        const options = {
+            nodes: {
+                shape: 'circle',
+                font: { color: '#343434' }
+            },
+            edges: {
+                color: '#848484',
+                width: 2,
+                smooth: { type: 'dynamic' },
+                font: {
+                    size: 14,
+                    color: '#F0F0F0',
+                    align: 'middle',
+                    strokeWidth: 0
+                },
+            },
+            physics: {
+                enabled: true,
+                stabilization: { iterations: 1000 }
+            }
+        };
+
+        const network = new vis.Network(container, data, options);
+        let nextNodeId = 1;
+
+        // Function to calculate color based on Power Usage and Power Limit
+        function calculateColor(powerUsage, powerLimit) {
+            if (powerLimit === 0) return '#00FF00';  // Green if limit is zero to avoid division by zero
+
+            const usagePercentage = powerUsage / powerLimit;
+
+            // Color transitions from green (low usage) to red (high usage)
+            if (usagePercentage < 0.5) {
+                return '#00FF00';  // Green
+            } else if (usagePercentage < 0.8) {
+                return '#FFFF00';  // Yellow
+            } else {
+                return '#FF0000';  // Red
+            }
+        }
+
+        function addNode() {
+            const label = prompt("Enter the label for the new node:");
+            const powerUsage = parseFloat(prompt("Enter Power Usage for the new node:")) || 0;
+            const powerLimit = parseFloat(prompt("Enter Power Limit for the new node:")) || 1;
+            const rate = parseFloat(prompt("Enter Rate for the new node:")) || 0;
+            const rateLimit = parseFloat(prompt("Enter Rate Limit for the new node:")) || 0;
+
+            const color = calculateColor(powerUsage, powerLimit);
+
+            nodes.add({
+                id: nextNodeId,
+                label: label || `Node ${nextNodeId}`,
+                powerUsage,
+                powerLimit,
+                rate,
+                rateLimit,
+                color: {
+                    background: color,
+                    border: color
+                }
+            });
+
+            nextNodeId++;
+        }
+
+        function removeNode() {
+            const nodeId = parseInt(prompt("Enter the ID of the node to remove:"), 10);
+            if (nodeId && nodes.get(nodeId)) {
+                nodes.remove({ id: nodeId });
+            } else {
+                alert("Node not found or invalid ID!");
+            }
+        }
+
+        function addEdge() {
+            const from = parseInt(prompt("Enter the source node ID:"), 10);
+            const to = parseInt(prompt("Enter the destination node ID:"), 10);
+            const label = prompt("Enter the label for the edge:");
+            if (from && to && label && nodes.get(from) && nodes.get(to)) {
+                edges.add({ from, to, label, font: { align: 'middle' } });
+            } else {
+                alert("Invalid input or node IDs not found!");
+            }
+        }
+
+        function removeEdge() {
+            const from = parseInt(prompt("Enter the source node ID:"), 10);
+            const to = parseInt(prompt("Enter the destination node ID:"), 10);
+            const edge = edges.get({
+                filter: (item) => item.from === from && item.to === to
+            });
+            if (edge.length) {
+                edges.remove(edge[0].id);
+            } else {
+                alert("Edge not found!");
+            }
+        }
+
+        // Add click event listener to display node details
+        network.on("click", function (params) {
+            if (params.nodes.length > 0) {
+                const nodeId = params.nodes[0];
+                const nodeData = nodes.get(nodeId);
+
+                alert(`Node ID: ${nodeData.id}
+Label: ${nodeData.label}
+Power Usage: ${nodeData.powerUsage}
+Power Limit: ${nodeData.powerLimit}
+Rate: ${nodeData.rate}
+Rate Limit: ${nodeData.rateLimit}`);
+            }
+        });
+    </script>
 </body>
 </html>

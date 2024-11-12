@@ -1,4 +1,4 @@
-const container = document.getElementById('graph');
+/* const container = document.getElementById('graph');
 
 const nodes = new vis.DataSet([
     { id: 1, label: 'Node 1' },
@@ -48,3 +48,4 @@ const options = {
 };
 
 const network = new vis.Network(container, data, options);
+ */
